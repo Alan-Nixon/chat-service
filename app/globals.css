@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+    overflow: hidden;
+    color: white
+}
+
+body::-webkit-scrollbar {
+    overflow: hidden;
+}
+
+.messageBar::-webkit-scrollbar {
+    display: none;
+}
