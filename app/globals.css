@@ -15,3 +15,7 @@ body::-webkit-scrollbar {
 .messageBar::-webkit-scrollbar {
     display: none;
 }
+
+.error {
+    color:red
+}
