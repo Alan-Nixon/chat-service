@@ -1,11 +1,27 @@
 "use client"
-import React, { useState } from 'react';
-import { validateEmail, validatePassword } from "../(functions)/Function"
-
+import React, { useEffect, useState } from 'react';
+import { LoginData } from '@/interfaces/interface_types';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link'
+import { signIn, useSession } from 'next-auth/react'
+import { validateEmail, validatePassword } from 'react-values-validator';
+import { LoadingPage } from '../components/Loading';
 
 function Page() {
-  const [loginData, setLoginData] = useState({ Email: "", Password: "" });
-  const [error, setError] = useState("")
+  const { data: session, status } = useSession();
+  const [loginData, setLoginData] = useState<LoginData>({ Email: "", Password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true)
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (session) {
+      router.push("/")
+    } else {
+      if (status !== "loading") { setLoading(false) }
+    }
+  }, [session, status])
 
   const setValue = (key: string, value: string) => {
     setLoginData((rest) => ({ ...rest, [key]: value }))
@@ -15,7 +31,23 @@ function Page() {
   const loginButton = () => {
     if (validateEmail(loginData.Email)) {
       if (validatePassword(loginData.Password)) {
-        alert("success")
+        setLoading(true)
+        signIn('credentials', {
+          redirect: false,
+          email: loginData.Email,
+          password: loginData.Password,
+        }).then(result => {
+          if (!result?.ok) {
+            setLoading(false)
+            setError("Invalid Email or Password try again")
+          } else {
+            router.push("/")
+            setTimeout(() => setLoading(false), 0)
+          }
+
+        });
+
+
       } else {
         setError("Please Enter a valid Password")
       }
@@ -23,6 +55,8 @@ function Page() {
       setError("Please Enter a valid Email")
     }
   }
+
+  if (loading) { return <LoadingPage /> }
 
   return (
     <div className="flex w-full h-[100vh]">
@@ -76,6 +110,7 @@ function Page() {
             >
               Submit
             </button>
+            <Link href="/register" className='text-blue-900 mt-2' >Doesn't have an account?</Link>
           </form>
         </div>
       </div>

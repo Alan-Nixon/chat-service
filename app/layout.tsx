@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import '../lib/db'
- 
+import ClientWrapper from "./ClientWrapper";
+
 
 export const metadata: Metadata = {
   title: "Av chat service",
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <ClientWrapper>
+          {children}
+        </ClientWrapper>
       </body>
     </html>
   );

@@ -1,3 +1,9 @@
+import { LoginData, registerData } from "@/interfaces/interface_types";
+import axios from "axios";
+
+
+const userAxiosInstance = axios.create({ baseURL: "http://localhost:3000/api/users" })
+
 export function getTimeDifference(targetDate: string) {
     const currentDate = new Date();
     const targetDateTime = new Date(targetDate).getTime();
@@ -21,5 +27,23 @@ export function getTimeDifference(targetDate: string) {
     return timeString.trim();
 }
 
-export const validateEmail = (email: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.trim())
-export const validatePassword = (pass: string) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(pass.trim())
+
+export const postLogin = async (Data: LoginData) => {
+    try {
+        const { data } = await userAxiosInstance.post("/login", Data);
+        return data
+    } catch (error: any) {
+        console.log(error)
+        return { message: error.message ?? "Error occured", status: false }
+    }
+}
+
+export const postRegister = async (registerData: registerData) => {
+    try {
+        const { data } = await userAxiosInstance.post("/register", registerData);
+        return data
+    } catch (error: any) {
+        console.log(error)
+        return { message: error.message ?? "Error occured", status: false }
+    }
+}
