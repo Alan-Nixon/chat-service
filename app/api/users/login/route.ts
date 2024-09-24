@@ -16,7 +16,6 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        console.log(body)
         const user = await UserModel.findOne({ Email: body.Email });
         if (user) {
             if (await compare(body.Password, user.Password)) {

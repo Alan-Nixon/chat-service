@@ -6,12 +6,14 @@ import SingleChat from './components/SingleChat'
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { LoadingPage } from './components/Loading';
+import { IChat, IUser } from '@/interfaces/interface_types';
 
 export default function Home() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true)
-
+  const [selectedUser, setSelectedUser] = useState<null | IUser>(null);
+  const [messages, setMessages] = useState<IChat[]>([])
 
   useEffect(() => {
     console.log(session, status)
@@ -31,8 +33,8 @@ export default function Home() {
     <>
       <NavBar />
       <div className="flex">
-        <SideUsers />
-        <SingleChat />
+        <SideUsers setSelectedUser={setSelectedUser} setMessages={setMessages} />
+        {selectedUser ? <SingleChat messages={messages} selectedUser={selectedUser} /> : <img src="/images/welcome.avif" className='w-full' alt="" />}
       </div>
     </>
   );

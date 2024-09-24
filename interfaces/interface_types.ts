@@ -1,4 +1,5 @@
 import { Document } from 'mongoose'
+import { Dispatch, SetStateAction } from 'react'
 
 export type chatSideBarType = {
     profileImage: string,
@@ -14,6 +15,15 @@ export interface IUser extends Document {
     profileImage: string,
     IsAdmin: boolean,
     IsBlocked: boolean
+    lastMessage?: string
+}
+
+export interface IChat extends Document {
+    from: string,
+    to: string,
+    message: string,
+    type: string,
+    seen: boolean
 }
 
 export interface LoginData {
@@ -26,4 +36,9 @@ export interface registerData {
     Email: string,
     Password: string,
     Phone: number
+}
+
+export interface SideUsersProps {
+    setSelectedUser: Dispatch<SetStateAction<IUser | null>>
+    setMessages: Dispatch<SetStateAction<IChat[]>>
 }

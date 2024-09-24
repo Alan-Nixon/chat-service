@@ -1,4 +1,4 @@
-import { LoginData, registerData } from "@/interfaces/interface_types";
+import { IChat, LoginData, registerData } from "@/interfaces/interface_types";
 import axios from "axios";
 
 
@@ -47,3 +47,25 @@ export const postRegister = async (registerData: registerData) => {
         return { message: error.message ?? "Error occured", status: false }
     }
 }
+
+export const getUsers = async () => {
+    try {
+        const { data } = await userAxiosInstance.get("/getUsers");
+        console.log(data, "this is alll users")
+        return data
+    } catch (error: any) {
+        console.log(error)
+        return { message: error.message ?? "Error occured", status: false }
+    }
+}
+
+export const getChat = async (from: string, to: string) => {
+    try {
+        const { data } = await userAxiosInstance.get(`/chat?from=${from}&to=${to}`);
+        return data
+    } catch (error: any) {
+        console.log(error)
+        return { message: error.message ?? "Error occured", status: false }
+    }
+}
+
