@@ -23,7 +23,9 @@ export interface IChat extends Document {
     to: string,
     message: string,
     type: string,
-    seen: boolean
+    seen: boolean,
+    createdAt: Date,
+    updatedAt: Date
 }
 
 export interface LoginData {
@@ -40,5 +42,12 @@ export interface registerData {
 
 export interface SideUsersProps {
     setSelectedUser: Dispatch<SetStateAction<IUser | null>>
+    setMessages: Dispatch<SetStateAction<IChat[]>>
+}
+
+
+export type singleChatTypeProp = {
+    selectedUser: IUser | null,
+    messages: IChat[],
     setMessages: Dispatch<SetStateAction<IChat[]>>
 }

@@ -1,116 +1,116 @@
-"use client";
-import React, { useState } from 'react';
-import FormControl from '@mui/material/FormControl';
-import Input from '@mui/material/Input';
-import { getTimeDifference } from '@/app/(functions)/Function';
-import dynamic from 'next/dynamic';
+"use client"
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Send } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { IChat, IUser, singleChatTypeProp } from '@/interfaces/interface_types'
+import dynamic from 'next/dynamic'
 import data from '@emoji-mart/data';
-import MoodOutlinedIcon from '@mui/icons-material/MoodOutlined';
-import SendIcon from '@mui/icons-material/Send';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import Image from 'next/image';
-import { IChat, IUser } from '@/interfaces/interface_types';
-import { useSession } from 'next-auth/react';
-
+import { Smile } from 'lucide-react'
 const Picker = dynamic(() => import('@emoji-mart/react'), { ssr: false });
 
-function page({ selectedUser, messages }: { selectedUser: IUser, messages: IChat[] }) {
+export default function MainChat({ selectedUser, messages, setMessages }: singleChatTypeProp) {
+  const [inputMessage, setInputMessage] = useState('')
   const [selectEmoji, setSelectEmoji] = useState(false);
-  const [message, setMessage] = useState("");
-  const { data: user } = useSession()
+  const emojiRef = useRef<HTMLDivElement | null>(null);
+  
 
-  const sendMessage = async () => {
-    if (message.trim() !== "") {
-      // const data = await sendMessagePost({
-      //   message, type: "text", from: user._id + "", to: selectedUser._id + "", seen: false
-      // })
+  const handleEmojiSelect = useCallback(({ native }: { native: string }) => {
+    setInputMessage((prev) => prev + native);
+    setSelectEmoji(false);
+  }, []);
+
+  const handleSendMessage = async () => {
+    if (inputMessage.trim() !== '') {
+      setInputMessage('')
     }
   }
 
-  return (
-    <main className="w-[75%]">
-      <div className="w-full flex p-2 bg-[#303033] h-16">
-        <Image src={selectedUser?.profileImage + ""} width={45} height={45} className="rounded-full ml-2" alt='' />
-        <div className=" ml-2">
-          <p className="font-bold">{selectedUser?.userName + ""}</p>
-          <p>online</p>
-        </div>
+
+  if (!selectedUser) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-muted">
+        <p className="text-muted-foreground">Select a chat to start messaging</p>
       </div>
-      {selectEmoji &&
-        <div className="fixed mt-1">
-          <Picker data={data} onEmojiSelect={({ native }: { native: string }) => setMessage(message + native)} />
+    )
+  }
+
+  return (
+    <div className="flex-1 flex flex-col">
+      <header className="bg-primary text-primary-foreground border-t-2 p-3 flex items-center space-x-4">
+        <Avatar>
+          <AvatarImage src={selectedUser.profileImage} alt={selectedUser.userName} />
+          <AvatarFallback>{selectedUser.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+        </Avatar>
+        <div>
+          <h2 className="text-lg font-semibold">{selectedUser.userName}</h2>
         </div>
-      }
+      </header>
 
-      <div className="flex h-[72vh] messageBar overflow-auto bg-yellow-100 flex-col" style={{ backgroundImage: "url('/images/chatBgImage.avif')" }} >
-        {messages.map((item, index) => (
+      <ScrollArea className="p-4 h-[calc(100vh-190px)]">
+        {messages.map((message) => (
           <div
-            key={index}
-            className={`flex w-[75%] p-3 max-w-xs ${item.from === user?._id ? 'justify-start' : 'justify-end ml-auto'}`}>
-
-            {item.from === user?._id ? (
-              <>
-                <div className="flex-shrink-0 h-8 w-8 m-1 rounded-full bg-gray-300">
-                  <img src={"personDetails.profileImage"} alt="Profile" className="rounded-full" />
-                </div>
-                <div>
-                  <div className="bg-gray-300 text-black flex p-3 ml-1 rounded-r-lg rounded-bl-lg">
-                    <p className="text-sm mr-3">{"item.message"}</p>
-                    {item.seen ? (
-                      <div className="w-4 mt-1 ml-auto">
-                        <img src="/images/double-check.png" alt="Seen" />
-                      </div>
-                    ) : (
-                      <div className="w-4 ml-auto">
-                        <img src="/images/check.png" alt="Delivered" />
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-xs text-gray-500 leading-none">
-                    {getTimeDifference(new Date() + "") ? getTimeDifference(new Date() + "") + " ago" : "Now"}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <div className="bg-indigo-300 text-black flex p-3 rounded-l-lg rounded-br-lg">
-                    <p className="text-sm mr-3">{"item.message"}</p>
-                    {item.seen ? (
-                      <div className="w-4 mt-1 ml-auto">
-                        <img src="/images/double-check.png" alt="Seen" />
-                      </div>
-                    ) : (
-                      <div className="w-4 ml-auto">
-                        <img src="/images/check.png" alt="Delivered" />
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-xs text-gray-500 leading-none">
-                    {getTimeDifference(new Date() + "") ? getTimeDifference(new Date() + "") + " ago" : "Now"}
-                  </span>
-                </div>
-                <div className="flex-shrink-0 h-8 w-8 m-1 rounded-full bg-gray-300">
-                  <img src={"user?.profileImage"} className="rounded-full" alt="User" />
-                </div>
-              </>
-            )}
+            key={message.id}
+            className={`mb-4 ${message.from === 'user' ? 'text-right' : 'text-left'}`}
+          >
+            <div
+              className={`inline-block p-2 rounded-lg ${message.from === 'user'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-secondary text-secondary-foreground'}`}
+            >
+              {message.message}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {message.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
           </div>
         ))}
-      </div>
+      </ScrollArea>
+      {selectEmoji && (
+        <div className="z-10 fixed mb-24" id='EMOJI_CLICKED_AREA' >
+          <Picker
+            data={data}
+            onEmojiSelect={handleEmojiSelect}
+          />
+        </div>
+      )}
 
-      <div className="w-[90%] p-1 text-black flex">
-        <AttachFileIcon className="m-1" />
-        <div onClick={(e) => setSelectEmoji(!selectEmoji)} >
-          <MoodOutlinedIcon className="mt-1" /> </div>
-        <FormControl fullWidth sx={{ m: 0 }} className="ml-2" variant="standard">
-          <Input id="standard-adornment-amount" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Enter Your Message" />
-        </FormControl>
-        <SendIcon className="ml-2" onClick={() => sendMessage()} />
-      </div>
+      <div className="p-4 border-t">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSendMessage();
+          }}
+          className="flex space-x-2"
+        >
+          <div className="relative" ref={emojiRef}>
 
-    </main>
-  );
+            <Button
+              variant="ghost"
+              type='button'
+              size="icon"
+              onClick={() => setSelectEmoji(prev => !prev)}
+              className="mr-2 text-black border-black"
+            >
+              <Smile className="h-6 w-6" />
+            </Button>
+          </div>
+
+          <Input
+            type="text"
+            placeholder="Type a message..."
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            className="flex-grow text-black"
+          />
+          <Button type="submit">
+            <Send className="h-4 w-4" />
+            <span className="sr-only">Send</span>
+          </Button>
+        </form>
+      </div>
+    </div>
+  )
 }
-
-export default page;

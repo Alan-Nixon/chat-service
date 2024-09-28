@@ -51,7 +51,6 @@ export const postRegister = async (registerData: registerData) => {
 export const getUsers = async () => {
     try {
         const { data } = await userAxiosInstance.get("/getUsers");
-        console.log(data, "this is alll users")
         return data
     } catch (error: any) {
         console.log(error)
@@ -68,4 +67,3 @@ export const getChat = async (from: string, to: string) => {
         return { message: error.message ?? "Error occured", status: false }
     }
 }
-

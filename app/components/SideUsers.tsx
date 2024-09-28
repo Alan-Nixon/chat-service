@@ -1,12 +1,13 @@
-"use client"
-import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
-import { IUser, SideUsersProps } from '../../interfaces/interface_types'
-import { getChat, getUsers } from '../(functions)/Function'
-import { useSession } from 'next-auth/react'
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { IUser, SideUsersProps } from "@/interfaces/interface_types"
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { getChat, getUsers } from "../(functions)/Function";
 
 
-function page({ setSelectedUser }: SideUsersProps) {
+export default function Sidebar({ setSelectedUser }: SideUsersProps) {
+
   const [sideBarData, setSideBarData] = useState<IUser[]>([]);
   const { data: user } = useSession()
 
@@ -18,28 +19,34 @@ function page({ setSelectedUser }: SideUsersProps) {
 
   const selectUser = (userData: IUser) => {
     setSelectedUser(userData);
-    getChat(user?._id + "", userData._id+"").then((data) => {
+    getChat(user?._id + "", userData._id + "").then((data) => {
       console.log(data)
     })
   }
 
   return (
-    <aside className='w-[25%] h-[93vh] bg-[#303033] border-r-2'>
-      <h2 className='mt-1 text-2xl font-bold text-center'>Chats</h2>
-      <div className='messageBar w-auto h-[85vh] overflow-auto'>
-        {sideBarData.map((item, index) => (
-          <div key={index} onClick={() => selectUser(item)} className='p-3 mt-2 hover:bg-[#424242] flex'>
-            <Image src={item.profileImage} alt='' width={50} height={50} className='rounded-full' />
-            <div className="ml-3">
-              <h1 className={(item.lastMessage ? "" : "mt-3") + " font-bold"}>{item.userName}</h1>
-              <p>{item.lastMessage}</p>
+    <aside className="w-64 bg-background border-r">
+      <div className="p-4 border-b">
+        <h2 className="text-xl font-bold">Chats</h2>
+      </div>
+      <ScrollArea className="h-[calc(100vh-5rem)]">
+        {sideBarData.map((user) => (
+          <div
+            key={user._id + "" + Math.random()}
+            className="flex items-center space-x-4 p-4 hover:bg-accent cursor-pointer"
+            onClick={() => selectUser(user)}
+          >
+            <Avatar>
+              <AvatarImage src={user.profileImage} alt={user.userName} />
+              <AvatarFallback>{user.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">{user.userName}</p>
+              <p className="text-sm text-gray-500 truncate">{user.lastMessage}</p>
             </div>
           </div>
         ))}
-      </div>
+      </ScrollArea>
     </aside>
-
   )
 }
-
-export default page
