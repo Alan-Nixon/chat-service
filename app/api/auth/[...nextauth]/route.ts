@@ -1,4 +1,4 @@
-import { postLogin } from '@/app/(functions)/Function';
+import { postLogin } from '@/app/(functions)/userFunction';
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 

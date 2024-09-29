@@ -12,7 +12,6 @@ function Page() {
   const [loginData, setLoginData] = useState<LoginData>({ Email: "", Password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true)
-
   const router = useRouter();
 
   useEffect(() => {
@@ -44,7 +43,6 @@ function Page() {
             router.push("/")
             setTimeout(() => setLoading(false), 0)
           }
-
         });
 
 

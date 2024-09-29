@@ -1,21 +1,37 @@
 "use client"
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { Send } from 'lucide-react'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { Mic, Send } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { IChat, IUser, singleChatTypeProp } from '@/interfaces/interface_types'
+import { singleChatTypeProp } from '@/interfaces/interface_types'
 import dynamic from 'next/dynamic'
 import data from '@emoji-mart/data';
 import { Smile } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { useSocket } from '../page'
 const Picker = dynamic(() => import('@emoji-mart/react'), { ssr: false });
 
 export default function MainChat({ selectedUser, messages, setMessages }: singleChatTypeProp) {
   const [inputMessage, setInputMessage] = useState('')
   const [selectEmoji, setSelectEmoji] = useState(false);
+  const [isOnline, setIsOnline] = useState("")
+
+  const { data: user } = useSession();
   const emojiRef = useRef<HTMLDivElement | null>(null);
-  
+  const socket = useSocket()
+
+
+  useEffect(() => {
+    if (socket && selectedUser && user) {
+      socket.emit("isOnline", { selectedUser: selectedUser?._id + "", userId: user?._id + "" });
+      socket.on("isOnline", ({ lastSeen, lastUserId }) => {
+        if (lastUserId === selectedUser._id)
+          setIsOnline(lastSeen)
+      })
+    }
+  }, [socket, selectedUser, user])
 
   const handleEmojiSelect = useCallback(({ native }: { native: string }) => {
     setInputMessage((prev) => prev + native);
@@ -23,8 +39,8 @@ export default function MainChat({ selectedUser, messages, setMessages }: single
   }, []);
 
   const handleSendMessage = async () => {
-    if (inputMessage.trim() !== '') {
-      setInputMessage('')
+    if (inputMessage.trim() !== '' && user) {
+      setInputMessage('');
     }
   }
 
@@ -39,13 +55,14 @@ export default function MainChat({ selectedUser, messages, setMessages }: single
 
   return (
     <div className="flex-1 flex flex-col">
-      <header className="bg-primary text-primary-foreground border-t-2 p-3 flex items-center space-x-4">
-        <Avatar>
+      <header className="bg-primary text-primary-foreground border-t-2 p-2 flex items-center space-x-4">
+        <Avatar className='ml-2' >
           <AvatarImage src={selectedUser.profileImage} alt={selectedUser.userName} />
           <AvatarFallback>{selectedUser.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
         </Avatar>
         <div>
           <h2 className="text-lg font-semibold">{selectedUser.userName}</h2>
+          <p>{isOnline}</p>
         </div>
       </header>
 
@@ -88,11 +105,11 @@ export default function MainChat({ selectedUser, messages, setMessages }: single
           <div className="relative" ref={emojiRef}>
 
             <Button
-              variant="ghost"
+              // variant="ghost"
               type='button'
               size="icon"
               onClick={() => setSelectEmoji(prev => !prev)}
-              className="mr-2 text-black border-black"
+              className="mr-2"
             >
               <Smile className="h-6 w-6" />
             </Button>
@@ -108,6 +125,9 @@ export default function MainChat({ selectedUser, messages, setMessages }: single
           <Button type="submit">
             <Send className="h-4 w-4" />
             <span className="sr-only">Send</span>
+          </Button>
+          <Button>
+            <Mic className="h-4 w-4" />
           </Button>
         </form>
       </div>

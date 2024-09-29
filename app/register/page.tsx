@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { validateEmail, validatePassword, validatePhone } from 'react-values-validator'
-import { postRegister } from '../(functions)/Function'
+import { postRegister } from '../(functions)/userFunction'
 import { signIn, useSession } from 'next-auth/react'
 import { LoadingPage } from '../components/Loading'
 

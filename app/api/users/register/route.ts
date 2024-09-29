@@ -16,6 +16,7 @@ export async function POST(req: Request) {
             body.IsAdmin = false
             body.IsBlocked = false
             body.profileImage = "https://res.cloudinary.com/dyh7c1wtm/image/upload/v1727013356/profile/chatService/user_jkk9gy.jpg"
+            body.lastSeen = new Date() + "";
             const data = await UserModel.insertMany(body);
             return sendResponse({ message: "gtcha", status: true, data: data[0] }, 200)
         }

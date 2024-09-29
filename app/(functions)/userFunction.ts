@@ -1,8 +1,18 @@
 import { IChat, LoginData, registerData } from "@/interfaces/interface_types";
 import axios from "axios";
+import { signOut } from "next-auth/react";
 
 
-const userAxiosInstance = axios.create({ baseURL: "http://localhost:3000/api/users" })
+const userAxiosInstance = axios.create({ baseURL: process.env.NEXT_PUBLIC_USER_URL + "" });
+const backendAxiosInstance = axios.create({ baseURL: process.env.NEXT_PUBLIC_SOCKET_URL + "" })
+
+
+export const logout = async (userId: string) => {
+    signOut({
+        callbackUrl: "/login"
+    });
+    const { data } = await backendAxiosInstance.post("/logout", { userId })
+}
 
 export function getTimeDifference(targetDate: string) {
     const currentDate = new Date();
@@ -67,3 +77,4 @@ export const getChat = async (from: string, to: string) => {
         return { message: error.message ?? "Error occured", status: false }
     }
 }
+

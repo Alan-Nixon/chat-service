@@ -9,7 +9,8 @@ const userSchema = new Schema<IUser>({
     Phone: { type: Number, required: true, unique: true },
     profileImage: { type: String, required: true },
     IsAdmin: { type: Boolean, required: true, default: false },
-    IsBlocked: { type: Boolean, required: true, default: false }
+    IsBlocked: { type: Boolean, required: true, default: false },
+    lastSeen: { type: String, required: true, default: false }
 
 }, { timestamps: true })
 

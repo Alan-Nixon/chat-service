@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useSession } from 'next-auth/react'
+import { logout } from '../(functions)/userFunction'
+import { useSocket } from '../page'
 
 export default function Navbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const { data: user } = useSession();
-
+    const socket = useSocket()
 
     return (
         <nav className="bg-primary text-primary-foreground p-2 flex items-center justify-between">
@@ -38,7 +40,10 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar: () => voi
                         <Button variant="ghost" size="icon">
                             <Bell className="h-5 w-5" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" onClick={() => {
+                            logout(user?._id + "");
+                            socket?.emit("log_online", { userId: user?._id + "", lastSeen: new Date() })
+                        }} size="icon">
                             <LogOut className="h-5 w-5" />
                         </Button>
                         <Sheet>

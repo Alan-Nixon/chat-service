@@ -16,6 +16,7 @@ export interface IUser extends Document {
     IsAdmin: boolean,
     IsBlocked: boolean
     lastMessage?: string
+    lastSeen?: string
 }
 
 export interface IChat extends Document {

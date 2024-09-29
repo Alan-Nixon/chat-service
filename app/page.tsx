@@ -16,40 +16,26 @@ export default function Home() {
   const [sideBarShow, setSideBarShow] = useState(true)
   const [selectedUser, setSelectedUser] = useState<null | IUser>(null);
   const [messages, setMessages] = useState<IChat[]>([]);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const socket = useSocket()
 
   useEffect(() => {
     if (session) {
       setLoading(false);
+      if (socket)
+        socket.emit("log_online", { lastSeen: "online", userId: session._id })
+
     } else {
       if (status !== "loading") {
         router.push("/login");
         setLoading(false);
       }
     }
-  }, [session, status]);
+  }, [session, status, socket]);
 
-  // Initialize socket connection
-  // useEffect(() => {
-  //   const socketUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'; // Ensure the URL is correct
-  //   const socketConnection = io(socketUrl, {
-  //     path: '/api/users/socket', // Match the backend socket path
-  //   });
 
-  //   setSocket(socketConnection);
-
-  //   // Listen to incoming messages
-  //   socketConnection.on('message', (msg: string) => {
-  //     console.log('Message received:', msg);
-  //   });
-
-  //   // Cleanup socket connection when component unmounts
-  //   return () => {
-  //     socketConnection.disconnect();
-  //   };
-  // }, []);
-
-  if (loading) { return <LoadingPage /> }
+  if (loading) {
+    return <LoadingPage />;
+  }
 
   return (
     <>
@@ -60,4 +46,24 @@ export default function Home() {
       </div>
     </>
   );
+}
+
+
+export function useSocket() {
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const { data: user } = useSession()
+  useEffect(() => {
+    if (user) {
+      const socketConnection = io(process.env.NEXT_PUBLIC_SOCKET_URL)
+
+      setSocket(socketConnection)
+      socketConnection.emit("join", user?._id + "")
+
+      return () => {
+        socketConnection.disconnect();
+      };
+    }
+  }, [user]);
+
+  return socket
 }

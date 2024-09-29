@@ -1,12 +1,12 @@
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { IUser, SideUsersProps } from "@/interfaces/interface_types"
+import { IChat, IUser, SideUsersProps } from "@/interfaces/interface_types"
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { getChat, getUsers } from "../(functions)/Function";
+import { getChat, getUsers } from "../(functions)/userFunction";
 
 
-export default function Sidebar({ setSelectedUser }: SideUsersProps) {
+export default function Sidebar({ setSelectedUser, setMessages }: SideUsersProps) {
 
   const [sideBarData, setSideBarData] = useState<IUser[]>([]);
   const { data: user } = useSession()
@@ -18,9 +18,21 @@ export default function Sidebar({ setSelectedUser }: SideUsersProps) {
   }, [])
 
   const selectUser = (userData: IUser) => {
-    setSelectedUser(userData);
     getChat(user?._id + "", userData._id + "").then((data) => {
-      console.log(data)
+      //  remove it 
+      const chats: IChat[] = new Array(10).fill({
+        from: "string",
+        to: "string",
+        message: userData.userName === "midhun chettan" ? "hi alan" : "good",
+        type: "text",
+        seen: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+
+      console.log(data);
+      setSelectedUser(userData);
+      setMessages(chats)
     })
   }
 
