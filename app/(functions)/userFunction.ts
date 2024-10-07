@@ -78,3 +78,13 @@ export const getChat = async (from: string, to: string) => {
     }
 }
 
+
+export const clearChatMessages = async (userId: string, selectedUserId: string) => {
+    try {
+        const { data } = await userAxiosInstance.delete(`/chat?userId=${userId}&selectedId=${selectedUserId}`)
+        return data
+    } catch (error: any) {
+        console.log(error)
+        return { message: error.message ?? "Error occured", status: false }
+    }
+}

@@ -3,7 +3,7 @@ import { compare } from 'bcrypt'
 
 const sendResponse = (data: any, status: number) => {
     return new Response(JSON.stringify(data), { status })
-}
+} 
 
 export async function GET(request: Request) {
     try {
@@ -29,5 +29,5 @@ export async function POST(request: Request) {
     } catch (error: any) {
         console.log(error)
         return sendResponse(error.message ?? "Internal server Error", 500)
-    }
+    } 
 }

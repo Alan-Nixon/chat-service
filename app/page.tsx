@@ -1,29 +1,29 @@
 "use client";
-import { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
-import NavBar from './components/Navbar';
-import SideUsers from './components/SideUsers';
-import SingleChat from './components/SingleChat';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { LoadingPage } from './components/Loading';
-import { IChat, IUser } from '@/interfaces/interface_types';
+import { useEffect, useState } from "react";
+import { io, Socket } from "socket.io-client";
+import NavBar from "./components/Navbar";
+import SideUsers from "./components/SideUsers";
+import SingleChat from "./components/SingleChat";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { LoadingPage } from "./components/Loading";
+import { IChat, IUser } from "@/interfaces/interface_types";
+import React from "react";
 
 export default function Home() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
-  const [sideBarShow, setSideBarShow] = useState(true)
+  const [sideBarShow, setSideBarShow] = useState(true);
   const [selectedUser, setSelectedUser] = useState<null | IUser>(null);
   const [messages, setMessages] = useState<IChat[]>([]);
-  const socket = useSocket()
+  const socket = useSocket();
 
   useEffect(() => {
     if (session) {
       setLoading(false);
       if (socket)
-        socket.emit("log_online", { lastSeen: "online", userId: session._id })
-
+        socket.emit("log_online", { lastSeen: "online", userId: session._id });
     } else {
       if (status !== "loading") {
         router.push("/login");
@@ -32,32 +32,51 @@ export default function Home() {
     }
   }, [session, status, socket]);
 
-
   if (loading) {
     return <LoadingPage />;
   }
 
   return (
     <>
-      <NavBar onToggleSidebar={() => { setSideBarShow(!sideBarShow) }} />
+      <NavBar
+        onToggleSidebar={() => {
+          setSideBarShow(!sideBarShow);
+        }}
+      />
       <div className="flex">
-        {sideBarShow && <SideUsers setSelectedUser={setSelectedUser} setMessages={setMessages} />}
-        <SingleChat messages={messages} selectedUser={selectedUser} setMessages={setMessages} />
+        {sideBarShow && (
+          <SideUsers
+            setSelectedUser={setSelectedUser}
+            setMessages={setMessages}
+          />
+        )}
+        {selectedUser ? (
+          <SingleChat
+            messages={messages}
+            selectedUser={selectedUser}
+            setMessages={setMessages}
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center bg-muted">
+            <p className="text-muted-foreground">
+              Select a chat to start messaging
+            </p>
+          </div>
+        )}
       </div>
     </>
   );
 }
 
-
 export function useSocket() {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const { data: user } = useSession()
+  const { data: user } = useSession();
   useEffect(() => {
     if (user) {
-      const socketConnection = io(process.env.NEXT_PUBLIC_SOCKET_URL)
+      const socketConnection = io(process.env.NEXT_PUBLIC_SOCKET_URL);
 
-      setSocket(socketConnection)
-      socketConnection.emit("join", user?._id + "")
+      setSocket(socketConnection);
+      socketConnection.emit("join", user?._id + "");
 
       return () => {
         socketConnection.disconnect();
@@ -65,5 +84,5 @@ export function useSocket() {
     }
   }, [user]);
 
-  return socket
+  return socket;
 }
