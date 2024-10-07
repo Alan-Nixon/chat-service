@@ -13,11 +13,8 @@ import { useSocket } from "../page";
 import ChatHeader from "./ChatHeader";
 const Picker = dynamic(() => import("@emoji-mart/react"), { ssr: false });
 
-export default function MainChat({
-  selectedUser,
-  messages,
-  setMessages,
-}: singleChatTypeProp) {
+export default function MainChat({ Data }: { Data: singleChatTypeProp }) {
+  const { selectedUser, messages, setMessages, navBarRef } = Data;
   const [inputMessage, setInputMessage] = useState("");
   const [selectEmoji, setSelectEmoji] = useState(false);
 
@@ -54,7 +51,17 @@ export default function MainChat({
   }, []);
 
   const scrollBottom = () => {
-    if (scrollRef.current) {
+    if (scrollRef.current && navBarRef.current) {
+      const args = (entries: any) => {
+        if (entries[0].isIntersecting) {
+          navBarRef.current.scrollIntoView({ behavior: "smooth" });
+          observer.disconnect();
+        }
+      };
+
+      const observer = new IntersectionObserver(args, { threshold: 1.0 });
+      observer.observe(scrollRef.current);
+
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
@@ -76,6 +83,13 @@ export default function MainChat({
     }
   };
 
+  const setTyping = () => {
+    socket?.emit("started_typing", {
+      to: selectedUser?._id,
+      from: user?._id,
+    });
+  };
+
   return (
     <div className="flex-1 flex flex-col">
       <ChatHeader
@@ -88,6 +102,7 @@ export default function MainChat({
         <div>
           {[...messages].map((message, index) => (
             <div
+              ref={index === messages.length - 1 ? scrollRef : null}
               key={index}
               className={`mb-4 ${
                 message.from === user?._id ? "text-right" : "text-left"
@@ -110,7 +125,7 @@ export default function MainChat({
               </div>
             </div>
           ))}
-          <div className="" ref={scrollRef} />
+          {/* <div className=""  /> */}
         </div>
       </ScrollArea>
 
@@ -143,7 +158,10 @@ export default function MainChat({
             type="text"
             placeholder="Type a message..."
             value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
+            onChange={(e) => {
+              setInputMessage(e.target.value);
+              setTyping();
+            }}
             className="flex-grow text-black"
           />
           <Button type="submit">

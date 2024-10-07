@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import NavBar from "./components/Navbar";
 import SideUsers from "./components/SideUsers";
@@ -17,6 +17,7 @@ export default function Home() {
   const [sideBarShow, setSideBarShow] = useState(true);
   const [selectedUser, setSelectedUser] = useState<null | IUser>(null);
   const [messages, setMessages] = useState<IChat[]>([]);
+  const navBarRef = useRef<any>();
   const socket = useSocket();
 
   useEffect(() => {
@@ -36,26 +37,17 @@ export default function Home() {
     return <LoadingPage />;
   }
 
+  const singleChatProps = { messages, selectedUser, setMessages, navBarRef };
+  const sideChatProps = { setSelectedUser, setMessages };
+  const onToggleSidebar = () => setSideBarShow(!sideBarShow);
+
   return (
     <>
-      <NavBar
-        onToggleSidebar={() => {
-          setSideBarShow(!sideBarShow);
-        }}
-      />
+      <NavBar navBarRef={navBarRef} onToggleSidebar={onToggleSidebar} />
       <div className="flex">
-        {sideBarShow && (
-          <SideUsers
-            setSelectedUser={setSelectedUser}
-            setMessages={setMessages}
-          />
-        )}
+        {sideBarShow && <SideUsers Data={sideChatProps} />}
         {selectedUser ? (
-          <SingleChat
-            messages={messages}
-            selectedUser={selectedUser}
-            setMessages={setMessages}
-          />
+          <SingleChat Data={singleChatProps} />
         ) : (
           <div className="flex-1 flex items-center justify-center bg-muted">
             <p className="text-muted-foreground">

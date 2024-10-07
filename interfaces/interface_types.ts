@@ -51,4 +51,5 @@ export type singleChatTypeProp = {
     selectedUser: IUser | null,
     messages: IChat[],
     setMessages: Dispatch<SetStateAction<IChat[]>>
+    navBarRef?:any
 }

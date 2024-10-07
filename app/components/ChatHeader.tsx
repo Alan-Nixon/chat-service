@@ -13,11 +13,7 @@ import {
 import { Settings } from "lucide-react";
 import { clearChatMessages } from "../(functions)/userFunction";
 
-function ChatHeader({
-  selectedUser,
-  messages,
-  setMessages,
-}: singleChatTypeProp) {
+function ChatHeader({ selectedUser, setMessages }: singleChatTypeProp) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isOnline, setIsOnline] = useState("");
   const { data: user } = useSession();
@@ -25,14 +21,25 @@ function ChatHeader({
 
   useEffect(() => {
     if (socket && selectedUser && user) {
-      socket.emit("isOnline", {
-        selectedUser: selectedUser?._id + "",
-        userId: user?._id + "",
-      });
-
+      const isOnline = () => {
+        socket.emit("isOnline", {
+          selectedUser: selectedUser?._id + "",
+          userId: user?._id + "",
+        });
+      };
+      isOnline();
       socket.on("isOnline", ({ lastSeen, lastUserId }) => {
         if (lastUserId === selectedUser._id) setIsOnline(lastSeen);
       });
+
+      const handleTyping = (payload: { from: string; to: string }) => {
+        if (payload.from === selectedUser._id && payload.to === user._id) {
+          setIsOnline("Typing...");
+          setTimeout(() => isOnline(), 1000);
+        }
+      };
+
+      socket.on("started_typing", handleTyping);
     }
   }, [socket, selectedUser, user]);
 

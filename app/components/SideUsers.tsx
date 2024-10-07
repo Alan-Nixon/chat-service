@@ -5,10 +5,8 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { getChat, getUsers } from "../(functions)/userFunction";
 
-export default function Sidebar({
-  setSelectedUser,
-  setMessages,
-}: SideUsersProps) {
+export default function Sidebar({ Data }: { Data: SideUsersProps }) {
+  const { setSelectedUser, setMessages } = Data;
   const [sideBarData, setSideBarData] = useState<IUser[]>([]);
   const { data: user } = useSession();
 
@@ -20,7 +18,7 @@ export default function Sidebar({
 
   const selectUser = (userData: IUser) => {
     getChat(user?._id + "", userData._id + "").then((chats) => {
-      setSelectedUser(()=>userData);
+      setSelectedUser(() => userData);
       setMessages(chats);
     });
   };
