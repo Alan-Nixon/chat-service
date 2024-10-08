@@ -1,17 +1,18 @@
 import { UserModel } from '@/models/users';
 import { compare } from 'bcrypt'
 
-const sendResponse = (data: any, status: number) => {
+interface data {
+    status: boolean,
+    message: string,
+    data?: object
+}
+
+
+const sendResponse = (data: data, status: number) => {
     return new Response(JSON.stringify(data), { status })
 }
 
-export async function GET(request: Request) {
-    try {
-        return sendResponse("hey", 200)
-    } catch (error) {
 
-    }
-}
 
 export async function POST(request: Request) {
     try {
@@ -30,8 +31,9 @@ export async function POST(request: Request) {
         } else {
             return sendResponse({ status: false, message: "Cannot find your account try register" }, 200)
         }
-    } catch (error: any) {
+    } catch (error) {
         console.log(error)
-        return sendResponse(error.message ?? "Internal server Error", 500)
+        const errorMessage =  JSON.parse(JSON.stringify(error)).message
+        return sendResponse(errorMessage ?? "Internal server Error", 500)
     }
 }

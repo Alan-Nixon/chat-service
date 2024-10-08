@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
@@ -17,11 +18,12 @@ export default function Home() {
   const [sideBarShow, setSideBarShow] = useState(true);
   const [selectedUser, setSelectedUser] = useState<null | IUser>(null);
   const [messages, setMessages] = useState<IChat[]>([]);
-  const navBarRef = useRef<any>();
+  const navBarRef = useRef();
   const socket = useSocket();
 
   useEffect(() => {
     if (session) {
+      console.log(session);
       setLoading(false);
       if (socket)
         socket.emit("log_online", { lastSeen: "online", userId: session._id });
@@ -66,7 +68,6 @@ export function useSocket() {
   useEffect(() => {
     if (user) {
       const socketConnection = io(process.env.NEXT_PUBLIC_SOCKET_URL);
-
       setSocket(socketConnection);
       socketConnection.emit("join", user?._id + "");
 

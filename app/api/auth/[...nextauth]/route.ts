@@ -1,6 +1,7 @@
-import { postLogin } from '@/app/(functions)/userFunction';
+import { getUser, postLogin } from '@/app/(functions)/userFunction';
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { sign } from 'jsonwebtoken';
 
 declare module 'next-auth' {
     interface Session {
@@ -10,9 +11,9 @@ declare module 'next-auth' {
         profileImage?: string;
         IsAdmin: boolean;
         IsBlocked: boolean;
-        Email: string
-        blockedUsers: string[]
-
+        Email: string;
+        blockedUsers: string[];
+        accessToken?: string;
     }
 
     interface User {
@@ -23,7 +24,7 @@ declare module 'next-auth' {
         Phone: number;
         profileImage: string;
         IsAdmin: boolean;
-        blockedUsers: string[] | []
+        blockedUsers: string[] | [];
         IsBlocked: boolean;
     }
 
@@ -36,6 +37,7 @@ declare module 'next-auth' {
         profileImage: string;
         IsAdmin: boolean;
         IsBlocked: boolean;
+        accessToken?: string;
     }
 }
 
@@ -68,8 +70,8 @@ const AUTHENTICATION = NextAuth({
                     } else {
                         return null;
                     }
-                } catch (error: any) {
-                    console.error("Error in login:", error.message);
+                } catch (error) {
+                    console.error("Error in login:", error);
                     return null;
                 }
             },
@@ -79,6 +81,7 @@ const AUTHENTICATION = NextAuth({
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
+                console.log("calling every time")
                 token._id = user._id;
                 token.id = user.id;
                 token.email = user.email;
@@ -87,22 +90,24 @@ const AUTHENTICATION = NextAuth({
                 token.profileImage = user.profileImage;
                 token.IsAdmin = user.IsAdmin;
                 token.IsBlocked = user.IsBlocked;
-                token.blockedUsers = user.blockedUsers
+                token.blockedUsers = user.blockedUsers;
             }
             return token;
         },
 
         async session({ session, token }) {
             if (token) {
-                session._id = token._id as string;
-                session.userName = token.userName as string;
-                session.Phone = token.Phone as string;
-                session.profileImage = token.profileImage as string;
-                session.IsAdmin = token.IsAdmin as boolean;
-                session.IsBlocked = token.IsBlocked as boolean;
-                session.Email = token.email as string
-                session.blockedUsers = token.blockedUsers as string[]
-
+                const { data } = await getUser(token?._id + "")
+                const userToken = sign(data, process.env.NEXT_PUBLIC_JWT_SECRET_KEY + "", { expiresIn: "1d" }) as string
+                session._id = data._id as string;
+                session.userName = data.userName as string;
+                session.Phone = data.Phone as string;
+                session.profileImage = data.profileImage as string;
+                session.IsAdmin = data.IsAdmin as boolean;
+                session.IsBlocked = data.IsBlocked as boolean;
+                session.Email = token.email as string;
+                session.blockedUsers = data.blockedUsers as string[];
+                session.accessToken = userToken
             }
             return session;
         },

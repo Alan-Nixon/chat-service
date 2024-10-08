@@ -1,7 +1,7 @@
 import { UserModel } from '@/models/users';
 import { hash } from 'bcrypt'
 
-const sendResponse = (data: any, status: number) => {
+const sendResponse = (data: object, status: number) => {
     return new Response(JSON.stringify(data), { status })
 }
 
@@ -20,7 +20,8 @@ export async function POST(req: Request) {
             const data = await UserModel.insertMany(body);
             return sendResponse({ message: "gtcha", status: true, data: data[0] }, 200)
         }
-    } catch (error: any) {
-        return sendResponse({ message: error.message ?? "Internal Error occured", status: true }, 500)
+    } catch (error) {
+        const errorMessage =  JSON.parse(JSON.stringify(error)).message
+        return sendResponse({ message: errorMessage ?? "Internal Error occured", status: true }, 500)
     }
 }

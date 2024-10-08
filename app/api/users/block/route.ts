@@ -14,8 +14,8 @@ export async function PATCH(req: Request) {
             await user.save()
         }
         return new Response("success", { status: 200 })
-    } catch (error: any) {
+    } catch (error) {
         console.log(error);
-        return new Response(JSON.stringify({ message: error.message ?? "Error occurred" }), { status: 500 });
+        return new Response(JSON.stringify({ message: JSON.parse(JSON.stringify(error)).message ?? "Error occurred" }), { status: 500 });
     }
 }

@@ -1,26 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Menu, MessageSquare, Bell, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
-import { logout } from "../(functions)/userFunction";
+import { logout, saveProfilImage } from "../(functions)/userFunction";
+import { navBarInterface } from "@/interfaces/interface_types";
 import { useSocket } from "../page";
 
-type navBarInterface = {
-  onToggleSidebar: () => void;
-  navBarRef: any;
-};
-
 export default function Navbar(props: navBarInterface) {
-    
   const { onToggleSidebar, navBarRef } = props;
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { data: user } = useSession();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [profileImg, setProfileImg] = useState(user?.profileImage + "");
   const socket = useSocket();
+  const profileImageref = useRef<HTMLInputElement | null>(null);
+
+  const openImage = () => {
+    if (profileImageref?.current) {
+      profileImageref?.current.click();
+    }
+  };
+  const saveImage = () => {
+    if (selectedImage) {
+      saveProfilImage(selectedImage, user?._id + "");
+      setSelectedImage(null);
+    }
+  };
 
   return (
     <nav
@@ -38,6 +48,19 @@ export default function Navbar(props: navBarInterface) {
         </Button>
         <h1 className="text-xl font-bold ml-5">AV Chats</h1>
       </div>
+      <input
+        type="file"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target?.files;
+          if (file) {
+            setSelectedImage(file[0]);
+            setProfileImg(URL.createObjectURL(file[0]));
+          }
+        }}
+        ref={profileImageref}
+        accept="image/*"
+      />
       <div className="flex items-center space-x-2">
         {isSearchOpen ? (
           <Input
@@ -76,10 +99,7 @@ export default function Navbar(props: navBarInterface) {
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Avatar>
-                    <AvatarImage
-                      src="/placeholder.svg?height=32&width=32"
-                      alt="User"
-                    />
+                    <AvatarImage src={user?.profileImage} alt="User" />
                     <AvatarFallback>U</AvatarFallback>
                   </Avatar>
                 </Button>
@@ -87,12 +107,16 @@ export default function Navbar(props: navBarInterface) {
               <SheetContent>
                 <div className="flex flex-col items-center justify-center h-full">
                   <Avatar className="h-24 w-24 mb-4">
-                    <AvatarImage src={user?.profileImage} alt="User" />
+                    <AvatarImage src={profileImg} alt="User" />
                     <AvatarFallback>U</AvatarFallback>
                   </Avatar>
                   <h2 className="text-2xl font-bold mb-2">{user?.userName}</h2>
                   <p className="text-muted-foreground mb-4">{user?.Email}</p>
-                  <Button>Edit Profile</Button>
+                  {selectedImage ? (
+                    <Button onClick={saveImage}>Save Profile</Button>
+                  ) : (
+                    <Button onClick={openImage}>Edit Profile</Button>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>

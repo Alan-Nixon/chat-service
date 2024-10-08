@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Mic, Send } from "lucide-react";
@@ -27,7 +28,7 @@ export default function MainChat({ Data }: { Data: singleChatTypeProp }) {
   );
 
   const emojiRef = useRef<HTMLDivElement | null>(null);
-  const scrollRef = useRef<any>();
+  const scrollRef = useRef<HTMLDivElement | null>(null);;
   const socket = useSocket();
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function MainChat({ Data }: { Data: singleChatTypeProp }) {
           payload.userId === selectedUser._id &&
           payload.selectedId === user._id;
         if (cond) {
-          setIsBlocked(!isBlocked);
+          setIsBlocked((prev) => !prev);
         }
       };
 

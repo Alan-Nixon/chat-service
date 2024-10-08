@@ -7,7 +7,7 @@ import { postRegister } from '../(functions)/userFunction'
 import { signIn, useSession } from 'next-auth/react'
 import { LoadingPage } from '../components/Loading'
 
-function page() {
+function Page() {
 
     const { data: session, status } = useSession();
     const [error, setError] = useState("")
@@ -27,7 +27,7 @@ function page() {
         if (validateEmail(registerData.Email)) {
             if (validatePassword(registerData.Password)) {
                 if (registerData.Phone !== -1 && validatePhone(registerData.Phone + "")) {
-                    postRegister(registerData).then((data:any) => {
+                    postRegister(registerData).then((data) => {
                         if (data.status) {
 
                             signIn('credentials', {
@@ -161,4 +161,4 @@ function page() {
     )
 }
 
-export default page
+export default Page

@@ -60,3 +60,8 @@ export type payloadIds = {
     selectedId: string,
     userId: string
 }
+
+export type navBarInterface = {
+    onToggleSidebar: () => void;
+    navBarRef: any;
+  };

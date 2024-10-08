@@ -14,7 +14,7 @@ export default function Sidebar({ Data }: { Data: SideUsersProps }) {
     getUsers().then(({ data }: { data: IUser[] }) => {
       setSideBarData(data.filter((item) => item._id !== user?._id));
     });
-  }, []);
+  }, [user]);
 
   const selectUser = (userData: IUser) => {
     getChat(user?._id + "", userData._id + "").then((chats) => {

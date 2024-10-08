@@ -1,17 +1,16 @@
-import { IChat, LoginData, registerData } from "@/interfaces/interface_types";
+/* eslint-disable */
+import { LoginData, registerData } from "@/interfaces/interface_types";
 import axios from "axios";
 import { signOut } from "next-auth/react";
 
-
 const userAxiosInstance = axios.create({ baseURL: process.env.NEXT_PUBLIC_USER_URL + "" });
-const backendAxiosInstance = axios.create({ baseURL: process.env.NEXT_PUBLIC_SOCKET_URL + "" })
+const backendAxiosInstance = axios.create({ baseURL: process.env.NEXT_PUBLIC_SOCKET_URL + "", headers: { Authorization: "Bearer eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..dtRUFWyVH03Ek4Dn.lYMQgPvby3F6mM9cyJPx-Hm0pQU2ZvYXFnsa3IKj83HrZH7vy1lbaPdNpUx6NVZTvY5L-J3omAQwxTCAfagn3-eWf2q_K-IgTrHILagCFC4SbUck6GE0rzpvbUpGG-V7PsgbCdfm-eedOPOj99Z97VNtGJwwyabENvM4xpifnjXWbd5padEA6isM1RZ9HtqskKN80G50x5jnDxiX6EVX7iIbXQ4PWt6CPMT14Gw3O6pvjqpv-Gj27k3LQeCJNlvX0btalwYclqQ74kmLWddxadu0dpjFeVRS2_TWZFQC57jEgF6cIqHZmC3RSeMhwvUVgNQOBCitnnTWO-SMMfGmMaDpaDNyICU1aowXg7axljUB_PpPQMWWNju6YKE_4x01vNGqQY6OJhjheOr2EMEyxD_6ysVZ-zj_b2SYHpcIyVunekGhv8tv5kL2Lc8q44R59nnzphJFa9IF0xPbdcBJdqGVfyFVfWXjvpCkYv2fQxC_PfjYL33KA8dd2Xn_h1W-dUbMCPY3n5C8rk2U7cadzU0hCRiTZAzaVc4IEyP_Yw.M1mVw9gO-eDtzNm1UiypqQ" } })
+
 
 
 export const logout = async (userId: string) => {
-    signOut({
-        callbackUrl: "/login"
-    });
-    const { data } = await backendAxiosInstance.post("/logout", { userId })
+    signOut({ callbackUrl: "/login" });
+    await backendAxiosInstance.post("/logout", { userId })
 }
 
 export function getTimeDifference(targetDate: string) {
@@ -68,6 +67,16 @@ export const getUsers = async () => {
     }
 }
 
+export const getUser = async (userId:string) => {
+    try {
+        const { data } = await userAxiosInstance.get("/getUsers/"+userId);
+        return data
+    } catch (error: any) {
+        console.log(error)
+        return { message: error.message ?? "Error occured", status: false }
+    }
+}
+
 export const getChat = async (from: string, to: string) => {
     try {
         const { data } = await userAxiosInstance.get(`/chat?from=${from}&to=${to}`);
@@ -98,3 +107,15 @@ export const userBlock = async (userId: string, selectedId: string) => {
         return { message: error.message ?? "Error occured", status: false }
     }
 }
+
+export const saveProfilImage = async (file: File, userId: string) => {
+    try {
+        const formData = new FormData();
+        formData.append("userId", userId);
+        formData.append("profileImg", file); 
+        const { data } = await backendAxiosInstance.post("/uploadImage", formData);
+        return data;
+    } catch (error: any) {
+        return { message: error.message ?? "Error occurred", status: false };
+    }
+};
