@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { IUser, singleChatTypeProp } from "@/interfaces/interface_types";
+import { singleChatTypeProp } from "@/interfaces/interface_types";
 import { useSocket } from "../page";
 import { useSession } from "next-auth/react";
 import {
@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Settings } from "lucide-react";
-import { clearChatMessages } from "../(functions)/userFunction";
+import { clearChatMessages, userBlock } from "../(functions)/userFunction";
 
 function ChatHeader({ selectedUser, setMessages }: singleChatTypeProp) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -46,6 +46,24 @@ function ChatHeader({ selectedUser, setMessages }: singleChatTypeProp) {
   const clearChat = () => {
     clearChatMessages(user?._id + "", selectedUser?._id + "");
     setMessages([]);
+  };
+
+  const blockUser = () => {
+    userBlock(user?._id + "", selectedUser?._id + "").then(() => {
+      if (user) {
+        if (user.blockedUsers?.includes(selectedUser?._id + "")) {
+          user.blockedUsers = user.blockedUsers?.filter(
+            (i) => i !== selectedUser?._id + ""
+          );
+        } else {
+          user.blockedUsers?.push(selectedUser?._id + "");
+        }
+        socket?.emit("block_user", {
+          selectedId: selectedUser?._id,
+          userId: user?._id,
+        });
+      }
+    });
   };
 
   return (
@@ -83,7 +101,10 @@ function ChatHeader({ selectedUser, setMessages }: singleChatTypeProp) {
           <DropdownMenuItem onClick={() => clearChat()}>
             Clear Chat
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => {}}>Block User</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => blockUser()}>
+            {user?.blockedUsers?.includes(selectedUser?._id + "") ? "Un" : ""}
+            Block User
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

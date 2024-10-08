@@ -9,8 +9,9 @@ const chatSchema = new Schema<IChat>({
     to: { type: String, required: true },
     message: { type: String, required: true },
     type: { type: String, enum: enumData, required: true, default: "text" },
-    seen: { type: Boolean, required: true, default: false }
+    seen: { type: Boolean, required: true, default: false },
+    archived: { type: [String], required: true, default: [] }
 
 }, { timestamps: true })
 
-export const ChatModel =models.chats || model("chats",chatSchema)
+export const ChatModel = models.chats || model("chats", chatSchema)

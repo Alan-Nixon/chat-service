@@ -4,7 +4,11 @@ import { Mic, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { IChat, singleChatTypeProp } from "@/interfaces/interface_types";
+import {
+  IChat,
+  payloadIds,
+  singleChatTypeProp,
+} from "@/interfaces/interface_types";
 import dynamic from "next/dynamic";
 import data from "@emoji-mart/data";
 import { Smile } from "lucide-react";
@@ -17,8 +21,11 @@ export default function MainChat({ Data }: { Data: singleChatTypeProp }) {
   const { selectedUser, messages, setMessages, navBarRef } = Data;
   const [inputMessage, setInputMessage] = useState("");
   const [selectEmoji, setSelectEmoji] = useState(false);
-
   const { data: user } = useSession();
+  const [isBlocked, setIsBlocked] = useState<boolean>(
+    !selectedUser?.blockedUsers.includes(user?._id + "")
+  );
+
   const emojiRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<any>();
   const socket = useSocket();
@@ -33,10 +40,21 @@ export default function MainChat({ Data }: { Data: singleChatTypeProp }) {
         }
       };
 
+      const handleBlock = (payload: payloadIds) => {
+        const cond =
+          payload.userId === selectedUser._id &&
+          payload.selectedId === user._id;
+        if (cond) {
+          setIsBlocked(!isBlocked);
+        }
+      };
+
       socket.on("input_message_send", handleMessage);
+      socket.on("block_user", handleBlock);
 
       return () => {
         socket.off("input_message_send", handleMessage);
+        socket.off("block_user", handleBlock);
       };
     }
   }, [socket, selectedUser, user]);
@@ -51,7 +69,7 @@ export default function MainChat({ Data }: { Data: singleChatTypeProp }) {
   }, []);
 
   const scrollBottom = () => {
-    if (scrollRef.current && navBarRef.current) {
+    if (scrollRef.current && navBarRef.current && messages.length > 6) {
       const args = (entries: any) => {
         if (entries[0].isIntersecting) {
           navBarRef.current.scrollIntoView({ behavior: "smooth" });
@@ -74,6 +92,7 @@ export default function MainChat({ Data }: { Data: singleChatTypeProp }) {
         message: inputMessage,
         type: "text",
         seen: false,
+        archived: [],
         createdAt: new Date(),
         updatedAt: new Date(),
       } as IChat;
@@ -125,7 +144,6 @@ export default function MainChat({ Data }: { Data: singleChatTypeProp }) {
               </div>
             </div>
           ))}
-          {/* <div className=""  /> */}
         </div>
       </ScrollArea>
 
@@ -135,44 +153,54 @@ export default function MainChat({ Data }: { Data: singleChatTypeProp }) {
         </div>
       )}
 
-      <div className="p-4 border-t">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-          className="flex space-x-2"
-        >
-          <div className="relative" ref={emojiRef}>
-            <Button
-              type="button"
-              size="icon"
-              onClick={() => setSelectEmoji((prev) => !prev)}
-              className="mr-2"
+      {isBlocked ? (
+        <>
+          <div className="p-2 mt-2 border-t">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="flex space-x-2"
             >
-              <Smile className="h-6 w-6" />
-            </Button>
-          </div>
+              <div className="relative" ref={emojiRef}>
+                <Button
+                  type="button"
+                  size="icon"
+                  onClick={() => setSelectEmoji((prev) => !prev)}
+                  className="mr-2"
+                >
+                  <Smile className="h-6 w-6" />
+                </Button>
+              </div>
 
-          <Input
-            type="text"
-            placeholder="Type a message..."
-            value={inputMessage}
-            onChange={(e) => {
-              setInputMessage(e.target.value);
-              setTyping();
-            }}
-            className="flex-grow text-black"
-          />
-          <Button type="submit">
-            <Send className="h-4 w-4" />
-            <span className="sr-only">Send</span>
-          </Button>
-          <Button>
-            <Mic className="h-4 w-4" />
-          </Button>
-        </form>
-      </div>
+              <Input
+                type="text"
+                placeholder="Type a message..."
+                value={inputMessage}
+                onChange={(e) => {
+                  setInputMessage(e.target.value);
+                  setTyping();
+                }}
+                className="flex-grow text-black"
+              />
+              <Button type="submit">
+                <Send className="h-4 w-4" />
+                <span className="sr-only">Send</span>
+              </Button>
+              <Button>
+                <Mic className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="p-4 text-red-600 mx-auto font-bold border-t">
+            You have been blocked by {selectedUser?.userName}
+          </div>
+        </>
+      )}
     </div>
   );
 }

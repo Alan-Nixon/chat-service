@@ -1,10 +1,14 @@
 import { ChatModel } from "@/models/chat";
-import { UserModel } from "@/models/users";
 
 const getChat = async (from: string, to: string) => {
-    return await ChatModel.find({ $or: [{ from, to }, { from: to, to: from }] })
-}
-
+    return await ChatModel.find({
+      $and: [
+        { $or: [{ from, to }, { from: to, to: from }] },
+        { archived: { $nin: [from] } }
+      ]
+    });
+  };
+  
 export async function GET(req: Request) {
     try {
         const url = new URL(req.url);
@@ -23,8 +27,15 @@ export async function DELETE(req: Request) {
         const url = new URL(req.url);
         const from = url.searchParams.get('userId') + "";
         const to = url.searchParams.get('selectedId') + "";
-        const data = await ChatModel.deleteMany({ $or: [{ from, to }, { from: to, to: from }] });
-        console.log(data,from,to)
+        const data = await ChatModel.find({ $or: [{ from, to }, { from: to, to: from }] });
+        for (const doc of data) {
+            if (doc.archived.includes(to)) {
+                await ChatModel.findByIdAndDelete(doc._id)
+            } else {
+                doc.archived.push(from)
+                await doc.save()
+            }
+        }
         return new Response(JSON.stringify(data), { status: 200 });
     } catch (error: any) {
         console.log(error);

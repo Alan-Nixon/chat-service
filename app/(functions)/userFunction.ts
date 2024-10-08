@@ -88,3 +88,13 @@ export const clearChatMessages = async (userId: string, selectedUserId: string) 
         return { message: error.message ?? "Error occured", status: false }
     }
 }
+
+
+export const userBlock = async (userId: string, selectedId: string) => {
+    try {
+        const { data } = await userAxiosInstance.patch("/block", { userId, selectedId });
+        return data
+    } catch (error: any) {
+        return { message: error.message ?? "Error occured", status: false }
+    }
+}

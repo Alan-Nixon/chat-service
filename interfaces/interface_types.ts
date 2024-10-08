@@ -17,6 +17,7 @@ export interface IUser extends Document {
     IsBlocked: boolean
     lastMessage?: string
     lastSeen?: string
+    blockedUsers: string[]
 }
 
 export interface IChat extends Document {
@@ -25,6 +26,7 @@ export interface IChat extends Document {
     message: string,
     type: string,
     seen: boolean,
+    archived: string[] | [],
     createdAt: Date,
     updatedAt: Date
 }
@@ -51,5 +53,10 @@ export type singleChatTypeProp = {
     selectedUser: IUser | null,
     messages: IChat[],
     setMessages: Dispatch<SetStateAction<IChat[]>>
-    navBarRef?:any
+    navBarRef?: any
+}
+
+export type payloadIds = {
+    selectedId: string,
+    userId: string
 }

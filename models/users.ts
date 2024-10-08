@@ -10,7 +10,8 @@ const userSchema = new Schema<IUser>({
     profileImage: { type: String, required: true },
     IsAdmin: { type: Boolean, required: true, default: false },
     IsBlocked: { type: Boolean, required: true, default: false },
-    lastSeen: { type: String, required: true, default: false }
+    lastSeen: { type: String, required: true, default: false },
+    blockedUsers: { type: [String], required: true, default: [] }
 
 }, { timestamps: true })
 

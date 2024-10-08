@@ -11,16 +11,19 @@ declare module 'next-auth' {
         IsAdmin: boolean;
         IsBlocked: boolean;
         Email: string
+        blockedUsers: string[]
+
     }
 
     interface User {
         _id: string;
-        id: string;  
+        id: string;
         email: string;
         userName: string;
         Phone: number;
         profileImage: string;
         IsAdmin: boolean;
+        blockedUsers: string[] | []
         IsBlocked: boolean;
     }
 
@@ -50,17 +53,17 @@ const AUTHENTICATION = NextAuth({
                         Email: credentials?.email + "",
                         Password: credentials?.password + ""
                     });
-
                     if (status && data) {
                         return {
-                            _id: data._id, 
-                            id: data._id,  
+                            _id: data._id,
+                            id: data._id,
                             email: data.Email,
                             userName: data.userName,
                             Phone: data.Phone,
                             profileImage: data.profileImage,
                             IsAdmin: data.IsAdmin,
                             IsBlocked: data.IsBlocked,
+                            blockedUsers: data.blockedUsers
                         };
                     } else {
                         return null;
@@ -84,6 +87,7 @@ const AUTHENTICATION = NextAuth({
                 token.profileImage = user.profileImage;
                 token.IsAdmin = user.IsAdmin;
                 token.IsBlocked = user.IsBlocked;
+                token.blockedUsers = user.blockedUsers
             }
             return token;
         },
@@ -97,6 +101,8 @@ const AUTHENTICATION = NextAuth({
                 session.IsAdmin = token.IsAdmin as boolean;
                 session.IsBlocked = token.IsBlocked as boolean;
                 session.Email = token.email as string
+                session.blockedUsers = token.blockedUsers as string[]
+
             }
             return session;
         },
