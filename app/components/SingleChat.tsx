@@ -14,7 +14,7 @@ import dynamic from "next/dynamic";
 import data from "@emoji-mart/data";
 import { Smile } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useSocket } from "../page";
+import { useSocket } from "../hooks/useSocket";
 import ChatHeader from "./ChatHeader";
 const Picker = dynamic(() => import("@emoji-mart/react"), { ssr: false });
 

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { singleChatTypeProp } from "@/interfaces/interface_types";
-import { useSocket } from "../page";
 import { useSession } from "next-auth/react";
 import {
   DropdownMenu,
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Settings } from "lucide-react";
 import { clearChatMessages, userBlock } from "../(functions)/userFunction";
+import { useSocket } from "../hooks/useSocket";
 
 function ChatHeader({ selectedUser, setMessages }: singleChatTypeProp) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

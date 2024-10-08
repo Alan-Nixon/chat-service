@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import { LoadingPage } from "./components/Loading";
 import { IChat, IUser } from "@/interfaces/interface_types";
 import React from "react";
+import { useSocket } from "./hooks/useSocket";
 
 export default function Home() {
   const router = useRouter();
@@ -62,20 +63,20 @@ export default function Home() {
   );
 }
 
-export function useSocket() {
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const { data: user } = useSession();
-  useEffect(() => {
-    if (user) {
-      const socketConnection = io(process.env.NEXT_PUBLIC_SOCKET_URL);
-      setSocket(socketConnection);
-      socketConnection.emit("join", user?._id + "");
+// export function useSocket() {
+//   const [socket, setSocket] = useState<Socket | null>(null);
+//   const { data: user } = useSession();
+//   useEffect(() => {
+//     if (user) {
+//       const socketConnection = io(process.env.NEXT_PUBLIC_SOCKET_URL);
+//       setSocket(socketConnection);
+//       socketConnection.emit("join", user?._id + "");
 
-      return () => {
-        socketConnection.disconnect();
-      };
-    }
-  }, [user]);
+//       return () => {
+//         socketConnection.disconnect();
+//       };
+//     }
+//   }, [user]);
 
-  return socket;
-}
+//   return socket;
+// }

@@ -9,7 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import { logout, saveProfilImage } from "../(functions)/userFunction";
 import { navBarInterface } from "@/interfaces/interface_types";
-import { useSocket } from "../page";
+import { useSocket } from "../hooks/useSocket";
+
 
 export default function Navbar(props: navBarInterface) {
   const { onToggleSidebar, navBarRef } = props;
